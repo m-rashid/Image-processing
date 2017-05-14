@@ -53,7 +53,14 @@ namespace RSHMUS001 {
     Image & operator + (const Image & rhs) {
 
 
-        
 
+    }
+
+    Image::iterator Image::begin() const {
+        return iterator (data.get());
+    }
+
+    Image::iterator Image::end() const {
+        return iterator (data.get() + (width*height));
     }
 }
