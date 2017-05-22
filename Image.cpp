@@ -50,7 +50,7 @@ namespace RSHMUS001 {
         return *this;
     }
 
-    Image & operator + (const Image & rhs) {
+    Image & Image::operator + (const Image & rhs) {
 
         if ((this -> height != rhs.height) && (this -> width != rhs.width)) {
             cerr << "Images are different sizes" << endl;
@@ -78,7 +78,77 @@ namespace RSHMUS001 {
 
     }
 
-    
+    Image & Image::operator - (const Image & rhs){
+
+        if ((this -> height != rhs.height) && (this -> width != rhs.width)) {
+            cerr << "Images are different sizes" << endl;
+            return 1;
+        }
+        Image result = *this;
+        Image::iterator img1_begin = this -> begin();
+        Image:iterator img1_end = this -> end();
+        Image::iterator img2_begin = rhs.begin();
+        Image::iterator res_begin = result.begin();
+
+        while (img1_begin != img1_end) {
+
+            int sum = *img1_begin - *img2_begin;
+            if (sum > 255) {
+                sum = 255;
+            }
+            *res_begin = sum;
+            ++img1_begin;
+            ++img2_begin;
+            ++res_begin;
+        }
+
+        return result;
+
+    }
+
+    Image & Image::operator ! (){
+
+        //Image result = *this;
+        Image::iterator begin = this -> begin();
+        Image::iterator end = this -> end();
+
+        while (begin != end) {
+            *begin = 255 - *begin;
+            ++begin;
+
+        }
+
+        return *this;
+
+    }
+
+    Image & Image::operator / (const Image & rhs) {
+
+        if ((this -> height != rhs.height) && (this -> width != rhs.width)) {
+            cerr << "Images are different sizes" << endl;
+            return 1;
+        }
+
+        Image result = *this;
+        Image::iterator img1_begin = this -> begin();
+        Image:iterator img1_end = this -> end();
+        Image::iterator mask_begin = rhs.begin();
+        Image::iterator res_begin = result.begin();
+
+        while (img1_begin != img1_end) {
+
+            if (*mask_begin != 255){
+                *res_begin = 0;
+            }
+            ++img1_begin;
+            ++mask_begin;
+            ++res_begin;
+        }
+
+        return result;
+
+
+    }
 
     Image::iterator Image::begin() const {
         return iterator (data.get());
