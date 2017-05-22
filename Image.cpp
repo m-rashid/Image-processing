@@ -52,9 +52,33 @@ namespace RSHMUS001 {
 
     Image & operator + (const Image & rhs) {
 
+        if ((this -> height != rhs.height) && (this -> width != rhs.width)) {
+            cerr << "Images are different sizes" << endl;
+            return 1;
+        }
+        Image result = *this;
+        Image::iterator img1_begin = this -> begin();
+        Image:iterator img1_end = this -> end();
+        Image::iterator img2_begin = rhs.begin();
+        Image::iterator res_begin = result.begin();
 
+        while (img1_begin != img1_end) {
+
+            int sum = *img1_begin + *img2_begin;
+            if (sum > 255) {
+                sum = 255;
+            }
+            *res_begin = sum;
+            ++img1_begin;
+            ++img2_begin;
+            ++res_begin;
+        }
+
+        return result;
 
     }
+
+    
 
     Image::iterator Image::begin() const {
         return iterator (data.get());
@@ -63,4 +87,6 @@ namespace RSHMUS001 {
     Image::iterator Image::end() const {
         return iterator (data.get() + (width*height));
     }
+
+
 }
