@@ -195,9 +195,19 @@ namespace RSHMUS001 {
         img.data = std::unique_ptr<unsigned char[]>(new unsigned char[size]);
         is >> ws;
         is.read((char*)(&(img.data[0])), size);
+        return is;
     }
 
+    ostream & operator << (ostream & os, const Image & img) {
 
+        os << "P5" << endl << "#This is the resultant image" << endl
+        os << img.height << " " << img.width << endl;
+        os << "255" << endl;
+
+        os.write((char*)&img.data[0], img.height*img.width);
+        return os;
+
+    }
 
     Image::iterator Image::begin() const {
         return iterator (data.get());
