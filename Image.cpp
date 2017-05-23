@@ -147,8 +147,57 @@ namespace RSHMUS001 {
 
         return result;
 
-
     }
+
+    Image & Image::operator * (int f) {
+
+        Image result = *this;
+        Image::iterator res_begin = result.begin();
+        Image::iterator res_end = result.end();
+
+        while (res_begin != res_end) {
+            if (*res_begin > f) {
+                *res_begin = 255;
+            }
+            else {
+                *res_begin = 0;
+            }
+
+            ++res_begin;
+        }
+
+        return result;
+    }
+
+    istream & Image::operator >> (istream & is, Image & img) {
+        /*Header Format:
+         * P5
+         * #Comment line (can be more than one)
+         * NRows Ncols
+         * 255
+         * binary_data_block */
+
+        string line;
+        int Nrows, Ncols;
+        getline (is, line);
+        while (line != '255') {
+            if (line!='P5' || line.at(0)!='#') {
+                istreamstream iss(line);
+                ss >> Nrows;
+                ss >> Ncols;
+            }
+
+            getline (is, line);
+        }
+        img.width = Ncols;
+        img.height = Nrows;
+        int size = Ncols * Nrows;
+        img.data = std::unique_ptr<unsigned char[]>(new unsigned char[size]);
+        is >> ws;
+        is.read((char*)(&(img.data[0])), size);
+    }
+
+
 
     Image::iterator Image::begin() const {
         return iterator (data.get());
