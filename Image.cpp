@@ -209,6 +209,54 @@ namespace RSHMUS001 {
 
     }
 
+    void Image::load (string filename) {
+
+        ifstream fin (filename.c_str(), ios::binary);
+        if (!fin){
+            cerr << "File open failed!" << endl;
+        }
+
+        string line;
+        int Nrows, Ncols;
+        getline (is, line);
+        while (line != '255') {
+            if (line!='P5' || line.at(0)!='#') {
+                istreamstream iss(line);
+                ss >> Nrows;
+                ss >> Ncols;
+            }
+
+            getline (fin, line);
+        }
+        img.width = Ncols;
+        img.height = Nrows;
+        int size = Ncols * Nrows;
+        img.data = std::unique_ptr<unsigned char[]>(new unsigned char[size]);
+        fin >> ws;
+        is.read((char*)(&(img.data[0])), size);
+        fin.close();
+
+    }
+
+
+    void Image::save(string filename) {
+
+        ofstream fout (filename.c_str(), ios::binary);
+        if (!fout){
+            cerr << "File open failed!" << endl;
+        }
+
+        fout << "P5" << endl << "#This is the resultant image" << endl
+        fout << img.height << " " << img.width << endl;
+        fout << "255" << endl;
+
+        fout.write((char*)&img.data[0], img.height*img.width);
+        fout.close();
+
+    }
+
+    }
+
     Image::iterator Image::begin() const {
         return iterator (data.get());
     }
