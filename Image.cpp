@@ -47,10 +47,14 @@ namespace RSHMUS001 {
 
     Image & Image::operator = (const Image & rhs) {
 
-        if(!(this == rhs)) {
+        if(this != &rhs) {
             width = rhs.width;
             height = rhs.height;
-            data.reset(new int (*rhs.data));
+            unsigned char* temp = new unsigned char[width*height];
+            for (int i=0; i<width*height; i++) {
+              temp[i] = rhs.data[i];
+            }
+            data.reset(temp);
         }
         return *this;
 
@@ -58,7 +62,7 @@ namespace RSHMUS001 {
 
     Image & Image::operator = (Image && rhs) {
 
-        if(this != rhs) {
+        if(this != &rhs) {
             width = rhs.width;
             height = rhs.height;
             data = move(rhs.data);
@@ -67,13 +71,13 @@ namespace RSHMUS001 {
         return *this;
     }
 
-    Image & Image::operator + (const Image & rhs) {
+    Image Image::operator + (const Image & rhs) {
 
         if ((this -> height != rhs.height) && (this -> width != rhs.width)) {
             cerr << "Images are different sizes" << endl;
-            return 1;
+            exit(1);
         }
-        Image result = *this;
+        Image result(*this);
         Image::iterator img1_begin = this -> begin();
         Image:iterator img1_end = this -> end();
         Image::iterator img2_begin = rhs.begin();
@@ -95,35 +99,33 @@ namespace RSHMUS001 {
 
     }
 
-    Image & Image::operator - (const Image & rhs) {
+    Image Image::operator - (const Image & rhs) {
 
         if ((this -> height != rhs.height) && (this -> width != rhs.width)) {
             cerr << "Images are different sizes" << endl;
-            return 1;
+            return *this;
         }
-        Image result = *this;
-        Image::iterator img1_begin = this -> begin();
-        Image:iterator img1_end = this -> end();
+        Image result(*this);
+        Image::iterator img1_begin = result.begin();
+        Image:iterator img1_end = result.end();
         Image::iterator img2_begin = rhs.begin();
-        Image::iterator res_begin = result.begin();
 
         while (img1_begin != img1_end) {
 
-            int sum = *img1_begin - *img2_begin;
-            if (sum > 255) {
-                sum = 255;
+            int diff = *img1_begin - *img2_begin;
+            if (diff > 255) {
+                diff = 255;
             }
-            *res_begin = sum;
+            *img1_begin = diff;
             ++img1_begin;
             ++img2_begin;
-            ++res_begin;
         }
 
         return result;
 
     }
 
-    Image & Image::operator ! () {
+    Image Image::operator ! () {
 
         //Image result = *this;
         Image::iterator begin = this -> begin();
@@ -139,14 +141,14 @@ namespace RSHMUS001 {
 
     }
 
-    Image & Image::operator / (const Image & rhs) {
+    Image Image::operator / (const Image & rhs) {
 
         if ((this -> height != rhs.height) && (this -> width != rhs.width)) {
             cerr << "Images are different sizes" << endl;
-            return 1;
+            return *this;
         }
 
-        Image result = *this;
+        Image result(*this);
         Image::iterator img1_begin = this -> begin();
         Image:iterator img1_end = this -> end();
         Image::iterator mask_begin = rhs.begin();
@@ -166,9 +168,9 @@ namespace RSHMUS001 {
 
     }
 
-    Image & Image::operator * (int f) {
+    Image Image::operator * (int f) {
 
-        Image result = *this;
+        Image result(*this);
         Image::iterator res_begin = result.begin();
         Image::iterator res_end = result.end();
 
@@ -186,7 +188,7 @@ namespace RSHMUS001 {
         return result;
     }
 
-    istream & Image::operator >> (std::istream & is, Image & img) {
+    istream & operator >> (istream & is, Image & img) {
         /*Header Format:
          * P5
          * #Comment line (can be more than one)
@@ -217,7 +219,7 @@ namespace RSHMUS001 {
 
     ostream & operator << (ostream & os, const Image & img) {
 
-        os << "P5" << endl << "#This is the resultant image" << endl
+        os << "P5" << endl << "#This is the resultant image" << endl;
         os << img.height << " " << img.width << endl;
         os << "255" << endl;
 
@@ -261,6 +263,7 @@ namespace RSHMUS001 {
         ofstream fout(filename.c_str(), ios::binary);
         if (!fout){
             cerr << "File open failed!" << endl;
+
         }
 
         fout << "P5" << endl << "#This is the resultant image" << endl;
