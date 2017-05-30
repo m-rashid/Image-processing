@@ -1,5 +1,6 @@
 #include "Image.h"
-
+#include <fstream>
+#include <sstream>
 using namespace std;
 
 namespace RSHMUS001 {
@@ -20,17 +21,33 @@ namespace RSHMUS001 {
 
     }
 
-    Image::Image (const Image & rhs) : width(rhs.width), height(rhs.height), data(new unsigned char(*rhs.data)) {}
+    Image::Image (const Image & rhs) : width(rhs.width), height(rhs.height){
 
-    Image::Image (Image && rhs) : width(rhs.width), height(rhs.height), data(move(rhs.data)) {
+        unsigned char* temp = new unsigned char[width*height];
+        for (int i=0; i<width*height; i++) {
+          temp[i] = rhs.data[i];
+        }
+        data.reset(temp);
 
-        data = nullptr;
+    }
 
+    Image::Image (Image && rhs) : width(rhs.width), height(rhs.height) {
+
+      unsigned char* temp = new unsigned char[width*height];
+      for (int i=0; i<width*height; i++) {
+        temp[i] = rhs.data[i];
+      }
+      data.reset(temp);
+
+      //maintain state of newly created object
+      rhs.data = nullptr;
+      rhs.width = 0;
+      rhs.height = 0;
     }
 
     Image & Image::operator = (const Image & rhs) {
 
-        if(this != rhs) {
+        if(!(this == rhs)) {
             width = rhs.width;
             height = rhs.height;
             data.reset(new int (*rhs.data));
@@ -43,7 +60,7 @@ namespace RSHMUS001 {
 
         if(this != rhs) {
             width = rhs.width;
-            hieght = rhs.height;
+            height = rhs.height;
             data = move(rhs.data);
         }
 
@@ -78,7 +95,7 @@ namespace RSHMUS001 {
 
     }
 
-    Image & Image::operator - (const Image & rhs){
+    Image & Image::operator - (const Image & rhs) {
 
         if ((this -> height != rhs.height) && (this -> width != rhs.width)) {
             cerr << "Images are different sizes" << endl;
@@ -106,7 +123,7 @@ namespace RSHMUS001 {
 
     }
 
-    Image & Image::operator ! (){
+    Image & Image::operator ! () {
 
         //Image result = *this;
         Image::iterator begin = this -> begin();
@@ -169,7 +186,7 @@ namespace RSHMUS001 {
         return result;
     }
 
-    istream & Image::operator >> (istream & is, Image & img) {
+    istream & Image::operator >> (std::istream & is, Image & img) {
         /*Header Format:
          * P5
          * #Comment line (can be more than one)
@@ -180,11 +197,11 @@ namespace RSHMUS001 {
         string line;
         int Nrows, Ncols;
         getline (is, line);
-        while (line != '255') {
-            if (line!='P5' || line.at(0)!='#') {
-                istreamstream iss(line);
-                ss >> Nrows;
-                ss >> Ncols;
+        while (line != "255") {
+            if (line!="P5" || line.at(0)!='#') {
+                istringstream iss(line);
+                iss >> Nrows;
+                iss >> Ncols;
             }
 
             getline (is, line);
@@ -218,22 +235,22 @@ namespace RSHMUS001 {
 
         string line;
         int Nrows, Ncols;
-        getline (is, line);
-        while (line != '255') {
-            if (line!='P5' || line.at(0)!='#') {
-                istreamstream iss(line);
-                ss >> Nrows;
-                ss >> Ncols;
+        getline (fin, line);
+        while (line != "255") {
+            if (line!="P5" || line.at(0)!='#') {
+                istringstream iss(line);
+                iss >> Nrows;
+                iss >> Ncols;
             }
 
             getline (fin, line);
         }
-        img.width = Ncols;
-        img.height = Nrows;
+        Image::width = Ncols;
+        Image::height = Nrows;
         int size = Ncols * Nrows;
-        img.data = std::unique_ptr<unsigned char[]>(new unsigned char[size]);
+        Image::data = std::unique_ptr<unsigned char[]>(new unsigned char[size]);
         fin >> ws;
-        is.read((char*)(&(img.data[0])), size);
+        fin.read((char*)(&(Image::data[0])), size);
         fin.close();
 
     }
@@ -241,21 +258,20 @@ namespace RSHMUS001 {
 
     void Image::save(string filename) {
 
-        ofstream fout (filename.c_str(), ios::binary);
+        ofstream fout(filename.c_str(), ios::binary);
         if (!fout){
             cerr << "File open failed!" << endl;
         }
 
-        fout << "P5" << endl << "#This is the resultant image" << endl
-        fout << img.height << " " << img.width << endl;
+        fout << "P5" << endl << "#This is the resultant image" << endl;
+        fout << Image::height << " " << Image::width << endl;
         fout << "255" << endl;
 
-        fout.write((char*)&img.data[0], img.height*img.width);
+        fout.write((char*)&Image::data[0], Image::height*Image::width);
         fout.close();
 
     }
 
-    }
 
     Image::iterator Image::begin() const {
         return iterator (data.get());
