@@ -302,5 +302,18 @@ namespace RSHMUS001 {
         return iterator (data.get() + (width*height));
     }
 
+    bool Image::operator == (const Image & rhs) {
+      if ((width != rhs.width) || (height != rhs.height) ) {
+        return false;
+      }
+
+      for (int i=0; i<(width*height); i++) {
+        if (data[i] != rhs.data[i]) {
+          return false;
+        }
+      }
+
+      return true;
+    }
 
 }
