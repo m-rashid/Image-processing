@@ -13,6 +13,10 @@ namespace RSHMUS001 {
 
     }
 
+    Image::Image(int w, int h, unsigned char * data_test) : width(w), height(h) {
+      data.reset(data_test);
+    }
+
     Image::~Image () {
 
         data = nullptr;
@@ -73,7 +77,7 @@ namespace RSHMUS001 {
 
     Image Image::operator + (const Image & rhs) {
 
-        if ((this -> height != rhs.height) && (this -> width != rhs.width)) {
+        if ((this->height != rhs.height) || (this->width != rhs.width)) {
             cerr << "Images are different sizes" << endl;
             exit(1);
         }
@@ -101,9 +105,9 @@ namespace RSHMUS001 {
 
     Image Image::operator - (const Image & rhs) {
 
-        if ((this -> height != rhs.height) && (this -> width != rhs.width)) {
+        if ((height != rhs.height) || (width != rhs.width)) {
             cerr << "Images are different sizes" << endl;
-            return *this;
+            exit(1);
         }
         Image result(*this);
         Image::iterator img1_begin = result.begin();
@@ -143,9 +147,9 @@ namespace RSHMUS001 {
 
     Image Image::operator / (const Image & rhs) {
 
-        if ((this -> height != rhs.height) && (this -> width != rhs.width)) {
+        if ((height != rhs.height) || (width != rhs.width)) {
             cerr << "Images are different sizes" << endl;
-            return *this;
+            exit(1);
         }
 
         Image result(*this);
@@ -230,9 +234,10 @@ namespace RSHMUS001 {
 
     void Image::load (string filename) {
 
-        ifstream fin (filename.c_str(), ios::binary);
+        ifstream fin (filename.c_str(), ios::in|ios::binary);
         if (!fin){
             cerr << "File open failed!" << endl;
+            exit(1);
         }
 
         string line;
@@ -247,12 +252,15 @@ namespace RSHMUS001 {
 
             getline (fin, line);
         }
-        Image::width = Ncols;
-        Image::height = Nrows;
+        width = Ncols;
+        height = Nrows;
         int size = Ncols * Nrows;
-        Image::data = std::unique_ptr<unsigned char[]>(new unsigned char[size]);
-        fin >> ws;
-        fin.read((char*)(&(Image::data[0])), size);
+        data.reset(new unsigned char[size]);
+        skipws(fin);
+        fin.read((char*)(&(data[0])), size);
+        //cout << "width: "<<width<<endl;
+        //cout << "height: " << height<<endl;
+        cout << "load successful!" << endl;
         fin.close();
 
     }
@@ -260,19 +268,29 @@ namespace RSHMUS001 {
 
     void Image::save(string filename) {
 
-        ofstream fout(filename.c_str(), ios::binary);
+        ofstream fout(filename.c_str(), ios::out|ios::binary);
         if (!fout){
             cerr << "File open failed!" << endl;
+            exit(1);
 
         }
 
         fout << "P5" << endl << "#This is the resultant image" << endl;
-        fout << Image::height << " " << Image::width << endl;
+        fout << to_string(Image::height) << " " << to_string(Image::width) << endl;
         fout << "255" << endl;
 
-        fout.write((char*)&Image::data[0], Image::height*Image::width);
+        fout.write((char*)&data[0], height*width);
+        cout << "Save successful!" << endl;
         fout.close();
 
+    }
+
+    int Image::getHeight () {
+      return height;
+    }
+
+    int Image::getWidth () {
+      return width;
     }
 
 
