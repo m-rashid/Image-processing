@@ -25,8 +25,8 @@ cd into the project folder. Execute the following command to run the program:
   ./imageops <option> <output file name (prefix only)>  
   
 ./imageops         : Name of the executable  
-<output file name> : Prefix of the output image file  
-<option>           : Could be one of the following operations performed on  
+\<output file name\> : Prefix of the output image file  
+\<option\>           : Could be one of the following operations performed on  
                      images I1 and I2  
   
                     -a I1 I2  
